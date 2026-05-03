@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=LookAway for Linux
+GenericName=Break Reminder
+Comment=20-20-20 break reminders, blink and posture nudges
+Exec=/home/gus/LookAwayLinux/bin/lookaway
+Icon=/home/gus/LookAwayLinux/assets/icon/icon.png
+Terminal=false
+Type=Application
+Categories=Utility;Office;
+StartupNotify=false
+X-GNOME-Autostart-enabled=true
