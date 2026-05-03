@@ -109,6 +109,10 @@ class SettingsDialog(QDialog):
         self._countdown.setChecked(self._settings.show_countdown)
         form.addRow("", self._countdown)
 
+        self._bubble = QCheckBox("Show floating countdown bubble (always-on-top)")
+        self._bubble.setChecked(self._settings.countdown_bubble_enabled)
+        form.addRow("", self._bubble)
+
         self._snooze_s = QSpinBox()
         self._snooze_s.setRange(30, 3600)
         self._snooze_s.setSuffix(" sec")
@@ -285,6 +289,7 @@ class SettingsDialog(QDialog):
             show_countdown=self._countdown.isChecked(),
             snooze_seconds=self._snooze_s.value(),
             snooze_limit_per_day=self._snooze_lim.value(),
+            countdown_bubble_enabled=self._bubble.isChecked(),
         )
 
     def _apply(self) -> None:

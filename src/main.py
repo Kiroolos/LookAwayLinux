@@ -24,6 +24,7 @@ def _qt_message_filter(mode, _ctx, msg: str) -> None:
 
 from .audio import play_async
 from .config import CONFIG_DIR, Settings, asset_dir, sound_path
+from .countdown_bubble import CountdownBubble
 from .idle import IdleMonitor
 from .mini_reminder import MiniReminderManager, ReminderRequest
 from .overlay import BreakRequest, OverlayController
@@ -45,6 +46,7 @@ class LookAwayApp:
         self._scheduler = BreakScheduler(self._settings, self._idle)
         self._overlay = OverlayController()
         self._reminders = MiniReminderManager()
+        self._bubble: CountdownBubble | None = None
         self._break_state: dict | None = None
         self._screen_time_timer = QTimer()
         self._screen_time_timer.setInterval(60_000)
@@ -133,6 +135,23 @@ class LookAwayApp:
         self._refresh_tray()
         self._scheduler.start()
         self._screen_time_timer.start()
+        self._sync_bubble()
+
+    def _sync_bubble(self) -> None:
+        if self._settings.countdown_bubble_enabled:
+            if self._bubble is None:
+                self._bubble = CountdownBubble(
+                    get_remaining=self._scheduler.seconds_until_break,
+                    get_paused=self._scheduler.is_paused,
+                    get_long_next=self._scheduler.is_long_break_next,
+                    on_click=lambda: self._scheduler.force_break(),
+                )
+                self._bubble.show_at_default_corner()
+            elif not self._bubble.isVisible():
+                self._bubble.show_at_default_corner()
+        else:
+            if self._bubble is not None:
+                self._bubble.hide_bubble()
 
     def _refresh_tray(self) -> None:
         if self._scheduler.is_paused():
@@ -169,6 +188,7 @@ class LookAwayApp:
         self._settings = settings
         self._scheduler.update_settings(settings)
         self._update_autostart(settings.autostart)
+        self._sync_bubble()
 
     def _pause(self, minutes: int | None) -> None:
         self._scheduler.pause(minutes)
@@ -228,6 +248,8 @@ class LookAwayApp:
 
         play_async(sound_path(self._settings.sound_set, "start"), self._settings.sound_volume)
         self._scheduler.suspend()
+        if self._bubble is not None:
+            self._bubble.hide_bubble()
 
     def _end_break(self, *, completed: bool = False, skipped: bool = False, snoozed: bool = False) -> None:
         if self._break_state is None:
@@ -251,6 +273,7 @@ class LookAwayApp:
             self._scheduler.snooze(self._settings.snooze_seconds)
         else:
             self._scheduler.reset_after_break(completed=completed)
+        self._sync_bubble()
 
     def _fire_blink(self) -> None:
         if not self._settings.notifications_enabled:
@@ -341,6 +364,8 @@ class LookAwayApp:
     def _quit(self) -> None:
         self._scheduler.stop()
         self._overlay.close()
+        if self._bubble is not None:
+            self._bubble.hide_bubble()
         self._qapp.quit()
 
 

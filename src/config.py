@@ -31,6 +31,7 @@ class Settings:
     show_countdown: bool = True
     snooze_seconds: int = 300
     snooze_limit_per_day: int = 4
+    countdown_bubble_enabled: bool = True
 
     @classmethod
     def load(cls) -> "Settings":
