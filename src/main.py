@@ -25,6 +25,7 @@ def _qt_message_filter(mode, _ctx, msg: str) -> None:
 from .audio import play_async
 from .config import CONFIG_DIR, Settings, asset_dir, sound_path
 from .idle import IdleMonitor
+from .mini_reminder import MiniReminderManager, ReminderRequest
 from .overlay import BreakRequest, OverlayController
 from .scheduler import BreakScheduler
 from .settings_dialog import SettingsDialog
@@ -43,6 +44,7 @@ class LookAwayApp:
         self._idle = IdleMonitor()
         self._scheduler = BreakScheduler(self._settings, self._idle)
         self._overlay = OverlayController()
+        self._reminders = MiniReminderManager()
         self._break_state: dict | None = None
         self._screen_time_timer = QTimer()
         self._screen_time_timer.setInterval(60_000)
@@ -251,7 +253,20 @@ class LookAwayApp:
             self._scheduler.reset_after_break(completed=completed)
 
     def _fire_blink(self) -> None:
-        self._notify("Blink reminder", "Blink slowly a few times — let your eyes refresh.")
+        if not self._settings.notifications_enabled:
+            return
+        sound = asset_dir() / "sounds" / "reminder-blink.m4a"
+        play_async(sound, max(40, self._settings.sound_volume - 30))
+        self._reminders.show(
+            ReminderRequest(
+                title="Blink, breathe, soften your gaze.",
+                subtitle="Blink slowly a few times — let your eyes refresh.",
+                glyph="◐",
+                accent="#7BA8FF",
+                duration_ms=6000,
+                near_cursor=False,
+            )
+        )
 
     def _fire_posture(self) -> None:
         self._notify("Posture check", "Sit tall, relax shoulders, screen at eye level.")
