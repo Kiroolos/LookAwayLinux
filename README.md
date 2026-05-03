@@ -78,3 +78,16 @@ LookAwayLinux/
 Idle detection uses the X11 ScreenSaver extension. KDE Plasma on Wayland exposes
 an X11 fallback through XWayland; pure Wayland sessions without XWayland will
 report idle = 0 and won't pause the timer when you step away.
+
+## Support
+
+If this saved your eyes a few hours of strain, a small tip is appreciated 🙏
+
+<p align="left">
+  <a href="https://paypal.me/kiroolosss">
+    <img src="https://img.shields.io/badge/PayPal-Donate-00457C?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal" />
+  </a>
+</p>
+
+→ [paypal.me/kiroolosss](https://paypal.me/kiroolosss)
+
