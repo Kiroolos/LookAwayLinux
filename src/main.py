@@ -269,7 +269,20 @@ class LookAwayApp:
         )
 
     def _fire_posture(self) -> None:
-        self._notify("Posture check", "Sit tall, relax shoulders, screen at eye level.")
+        if not self._settings.notifications_enabled:
+            return
+        sound = asset_dir() / "sounds" / "reminder-posture.m4a"
+        play_async(sound, max(40, self._settings.sound_volume - 30))
+        self._reminders.show(
+            ReminderRequest(
+                title="Posture check.",
+                subtitle="Sit tall. Relax shoulders. Screen at eye level.",
+                glyph="↑",
+                accent="#9DE0AD",
+                duration_ms=7000,
+                near_cursor=False,
+            )
+        )
 
     def _notify(self, title: str, body: str) -> None:
         if not self._settings.notifications_enabled:
